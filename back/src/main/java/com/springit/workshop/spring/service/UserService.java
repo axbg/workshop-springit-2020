@@ -8,9 +8,9 @@ public interface UserService {
 
     User getCurrentUser();
 
-    User register(String email, String password);
+    User register(String email, String password) throws SpringBusinessException;
 
-    User login(String email, String password);
+    User login(String email, String password) throws SpringBusinessException;
 
     void reset();
 }

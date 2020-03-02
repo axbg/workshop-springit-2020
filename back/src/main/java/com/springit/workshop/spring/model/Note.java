@@ -1,15 +1,11 @@
 package com.springit.workshop.spring.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 
 @Data
 @Entity
@@ -25,17 +21,16 @@ public class Note extends AuditableEntity {
 
     private boolean isPublic = false;
 
-    @JsonIgnore
     @ManyToOne
+    @JsonIgnore
     private User owner;
 
+    @JsonIgnore
     public Note getNoteWithShortContent() {
         Note note = new Note();
-
         note.setId(this.id);
-        note.setContent(this.content.substring(0, 20));
+        note.setContent(this.content.substring(0, 20).trim() + "...");
         note.setPublic(this.isPublic);
-
         return note;
     }
 }

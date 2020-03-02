@@ -2,24 +2,16 @@ package com.springit.workshop.spring.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Date;
-import javax.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.Cookie;
+import java.util.Date;
 
 @Component
 public class JwtUtils {
     private static String secret;
     private static int expiration;
-
-    public static String generateJwt(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + expiration))
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
-    }
 
     public static String getEmailFromJwt(String token) {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
@@ -38,8 +30,8 @@ public class JwtUtils {
         }
     }
 
-    public static Cookie generateJwtCookie(String jwt) {
-        Cookie jwtCookie = new Cookie("X-AUTH", jwt);
+    public static Cookie generateJwtCookie(String email) {
+        Cookie jwtCookie = new Cookie("X-AUTH", generateJwt(email));
         jwtCookie.setPath("/");
         jwtCookie.setHttpOnly(true);
         jwtCookie.setMaxAge(expiration);
@@ -55,5 +47,14 @@ public class JwtUtils {
     @Value("${app.jwt.expiration}")
     private void setExpiration(int expirationValue) {
         expiration = expirationValue;
+    }
+
+    private static String generateJwt(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime() + expiration))
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
     }
 }

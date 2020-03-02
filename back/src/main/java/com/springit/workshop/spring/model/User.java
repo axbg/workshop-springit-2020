@@ -1,26 +1,20 @@
 package com.springit.workshop.spring.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
+import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.time.Instant;
+import java.util.Collection;
+
 @Data
 @Entity
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonIgnoreProperties({ "id", "password", "lastReset", "notes" })
 public class User extends AuditableEntity implements Authentication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +26,12 @@ public class User extends AuditableEntity implements Authentication {
 
     private String password;
 
-    private LocalDateTime lastReset = LocalDateTime.now();
+    private Instant lastReset = Instant.now();
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-    private List<Note> notes;
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
 
     /* Authentication impl */
     @Override
