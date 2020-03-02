@@ -1,18 +1,35 @@
 package com.springit.workshop.spring.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@RequiredArgsConstructor
+class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final JwtFilter authTokenFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
         http
-                .formLogin().disable()
                 .csrf().disable()
-                .authorizeRequests().antMatchers("/**").permitAll();
+                .formLogin().disable()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers("/api/user/login").permitAll()
+                .antMatchers("/api/user/register").permitAll()
+                .anyRequest().authenticated();
+
+        http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }
