@@ -1,4 +1,5 @@
 <template>
+  <div>
   <div class="container">
     <NoteTile v-for="(note, index) in notes" :key="index" v-bind:id="note.id"
     :content="note.content"/>
@@ -9,6 +10,10 @@
         :distance="20"
         spinner="waveDots"
       />
+  </div>
+  <md-button class="md-fab md-mini fab" @click="createNote">
+        <md-icon>add</md-icon>
+  </md-button>
   </div>
 </template>
 
@@ -42,6 +47,9 @@ export default {
     async scrollHandler($state) {
       $state.complete();
     },
+    async createNote() {
+      alert('creating note');
+    },
   },
   components: {
     NoteTile,
@@ -67,5 +75,12 @@ export default {
   height: 60px;
   padding: 0 !important;
   color: red;
+}
+.fab {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background-color: var(--accent-color);
+  color: whitesmoke;
 }
 </style>
