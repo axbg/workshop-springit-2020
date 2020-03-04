@@ -3,7 +3,7 @@
     <md-card md-with-hover>
       <md-ripple>
         <md-card-header>
-            <div class="md-subhead">Last modified: 03-03-2020</div>
+            <div class="md-subhead">Last modified: {{lastModified}}</div>
         </md-card-header>
         <md-card-content>
           <p>{{content}}</p>
@@ -22,6 +22,7 @@ export default {
   props: {
     id: Number,
     content: String,
+    updated: Array,
   },
   methods: {
     navigateToNote() {
@@ -29,7 +30,13 @@ export default {
     },
     remove(event) {
       event.stopPropagation();
-      alert('remove this one');
+      this.$emit('deleted', this.id);
+    },
+  },
+  computed: {
+    lastModified() {
+      return `${this.updated[2]}-${this.updated[1]}-${this.updated[0]} ${
+        this.updated[3]}:${this.updated[4]}`;
     },
   },
 };

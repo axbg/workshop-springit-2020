@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <p>Last modified today</p>
+    <p>Last modified: {{this.computeUpdated}}</p>
     <div class="editor">
       <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
         <div class="menubar">
@@ -45,7 +45,7 @@
           </button>
 
           <button class="menubar__button" @click="changeStatus">
-            <md-icon v-if="status">lock_open</md-icon>
+            <md-icon v-if="isPublic">lock_open</md-icon>
             <md-icon v-else>lock</md-icon>
           </button>
 
@@ -54,7 +54,7 @@
           </button>
         </div>
       </editor-menu-bar>
-      <editor-content class="editor__content" :editor="editor" @click="selectChild"/>
+      <editor-content class="editor__content" :editor="editor" />
     </div>
     <md-button class="md-fab md-mini fab" @click="removeNote">
       <md-icon>delete</md-icon>
@@ -83,7 +83,10 @@ export default {
   name: 'Note',
   data() {
     return {
-      status: true,
+      id: 0,
+      isPublic: false,
+      content: 'Loading the content',
+      updated: 'undefined',
       editor: new Editor({
         extensions: [
           new Heading({ levels: [1, 2, 3] }),
@@ -96,17 +99,21 @@ export default {
           new Strike(),
           new Underline(),
         ],
-        content: `
-          <h2>
-            Hi there,
-          </h2>
-        `,
         onUpdate({ getHTML }) {
           this.content = getHTML();
         },
       }),
-      content: 'some content',
     };
+  },
+  async mounted() {
+    const result = await this.$fetchHandler(`${this.$baseUrl}/note/${this.$route.params.id}`, 'GET');
+
+    if (result.status === 200) {
+      const note = await result.json();
+      this.updateNote(note);
+    } else {
+      this.$toasted.show('Error when loading note');
+    }
   },
   methods: {
     showImagePrompt(command) {
@@ -115,20 +122,56 @@ export default {
         command({ src });
       }
     },
-    selectChild() {
-      alert('select');
+    updateNote(note) {
+      this.id = note.id;
+      this.content = note.content;
+      this.updated = note.updated;
+      this.isPublic = note.isPublic;
+      this.editor.setContent(note.content);
+      this.editor.content = note.content;
     },
     async changeStatus() {
-      alert('changing status');
+      const result = await this.$fetchHandler(`${this.$baseUrl}/note`, 'PUT', {
+        id: this.id,
+        isPublic: !this.isPublic,
+      });
+
+      if (result.status === 200) {
+        this.isPublic = !this.isPublic;
+        this.$toasted.show('Status updated');
+      }
     },
     async saveContent() {
-      alert(this.editor.content);
+      console.log(this.editor.content);
+      const result = await this.$fetchHandler(`${this.$baseUrl}/note`, 'PUT', {
+        id: this.id,
+        content: this.editor.content,
+        isPublic: null,
+      });
+
+      if (result.status === 200) {
+        const note = await result.json();
+        this.updateNote(note);
+        this.$toasted.show('Saved');
+      }
     },
-    shareContent() {
-      this.$toasted.show('Copied to clipboard');
+    async shareContent() {
+      this.isPublic = false;
+      await this.changeStatus();
+      window.open(`http://localhost:8081/#/public/${this.id}`);
     },
     async removeNote() {
-      alert('removing note');
+      const result = await this.$fetchHandler(`${this.$baseUrl}/note/${this.id}`, 'DELETE');
+
+      if (result.status === 200) {
+        this.$router.push('/');
+      }
+    },
+  },
+  computed: {
+    computeUpdated() {
+      return `${this.updated[2]}-${this.updated[1]}-${this.updated[0]} ${
+        this.updated[3]}:${this.updated[4] > 9 ? this.updated[4] : '0'.concat(this.updated[4])}`;
     },
   },
   beforeDestroy() {

@@ -13,10 +13,18 @@ export default {
   data() {
     return {
       content: '',
+      updated: '',
     };
   },
-  beforeMount() {
-    // try to load content
+  async mounted() {
+    const result = await this.$fetchHandler(`${this.$baseUrl}/note/public/${this.$route.params.id}`);
+
+    if (result.status === 200) {
+      const note = await result.json();
+      this.content = note.content;
+    } else {
+      this.content = '<h3>Note was not found</h3>';
+    }
   },
   computed: {
     escapedContent() {

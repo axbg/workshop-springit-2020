@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Navbar displayControls="true" />
+    <Navbar v-bind:displayControls="true" />
     <router-view/>
   </div>
 </template>

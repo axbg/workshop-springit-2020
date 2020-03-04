@@ -2,7 +2,7 @@
   <div>
   <div class="container">
     <NoteTile v-for="(note, index) in notes" :key="index" v-bind:id="note.id"
-    :content="note.content"/>
+    :content="note.content" :updated="note.updated" @deleted="deleteNote"/>
     <p class="list-end">👌</p>
   </div>
   <md-button class="md-fab md-mini fab" @click="createNote">
@@ -17,31 +17,26 @@ import NoteTile from './NoteTile.vue';
 export default {
   name: 'NoteDashboard',
   data: () => ({
-    notes: [
-      {
-        id: 1,
-        content: 'content#1',
-      },
-      {
-        id: 2,
-        content: 'content#2',
-      },
-      {
-        id: 3,
-        content: 'content#3',
-      },
-      {
-        id: 4,
-        content: 'content#4',
-      },
-    ],
+    notes: [],
   }),
+  async mounted() {
+    const response = await this.$fetchHandler(`${this.$baseUrl}/note`, 'GET');
+    this.notes = await response.json();
+  },
   methods: {
-    async scrollHandler($state) {
-      $state.complete();
-    },
     async createNote() {
-      alert('creating note');
+      const result = await this.$fetchHandler(`${this.$baseUrl}/note`, 'POST', { content: '' });
+
+      const note = await result.json();
+      this.notes.push(note);
+    },
+    async deleteNote(id) {
+      const result = await this.$fetchHandler(`${this.$baseUrl}/note/${id}`, 'DELETE');
+
+      if (result.status === 200) {
+        this.notes = this.notes.filter((note) => note.id !== id);
+        this.$toasted.show('Removed');
+      }
     },
   },
   components: {
