@@ -9,7 +9,7 @@
           <p>{{content}}</p>
         </md-card-content>
         <md-card-actions>
-          <md-button @click="remove">Delete</md-button>
+          <md-button class="note-button" @click="remove">Delete</md-button>
         </md-card-actions>
       </md-ripple>
     </md-card>
@@ -36,8 +36,14 @@ export default {
 </script>
 
 <style scoped>
+@import "../assets/variables.css";
+
 .note-container {
     background-color: white;
     user-select: none;
+}
+.note-button {
+  background-color: var(--accent-color);
+  color: white;
 }
 </style>

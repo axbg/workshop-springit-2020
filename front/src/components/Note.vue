@@ -36,6 +36,10 @@
             <md-icon>format_underline</md-icon>
           </button>
 
+          <button class="menubar__button" @click="showImagePrompt(commands.image)">
+            <md-icon>image</md-icon>
+          </button>
+
           <button class="menubar__button" @click="commands.horizontal_rule">
             <md-icon>minimize</md-icon>
           </button>
@@ -50,12 +54,12 @@
           </button>
         </div>
       </editor-menu-bar>
-      <editor-content class="editor__content" :editor="editor" />
+      <editor-content class="editor__content" :editor="editor" @click="selectChild"/>
     </div>
     <md-button class="md-fab md-mini fab" @click="removeNote">
       <md-icon>delete</md-icon>
     </md-button>
-    <md-button class="md-fab md-mini fab fab-2" @click="removeNote">
+    <md-button class="md-fab md-mini fab fab-2" @click="shareContent">
       <md-icon>share</md-icon>
     </md-button>
   </div>
@@ -64,23 +68,15 @@
 <script>
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap';
 import {
-  Blockquote,
-  CodeBlock,
-  HardBreak,
   Heading,
   HorizontalRule,
-  OrderedList,
   BulletList,
   ListItem,
-  TodoItem,
-  TodoList,
   Bold,
-  Code,
   Italic,
-  Link,
   Strike,
   Underline,
-  History,
+  Image,
 } from 'tiptap-extensions';
 
 export default {
@@ -90,23 +86,15 @@ export default {
       status: true,
       editor: new Editor({
         extensions: [
-          new Blockquote(),
-          new BulletList(),
-          new CodeBlock(),
-          new HardBreak(),
           new Heading({ levels: [1, 2, 3] }),
           new HorizontalRule(),
+          new BulletList(),
           new ListItem(),
-          new OrderedList(),
-          new TodoItem(),
-          new TodoList(),
-          new Link(),
           new Bold(),
-          new Code(),
+          new Image(),
           new Italic(),
           new Strike(),
           new Underline(),
-          new History(),
         ],
         content: `
           <h2>
@@ -121,11 +109,23 @@ export default {
     };
   },
   methods: {
+    showImagePrompt(command) {
+      const src = prompt('Enter the url of your image here');
+      if (src !== null) {
+        command({ src });
+      }
+    },
+    selectChild() {
+      alert('select');
+    },
     async changeStatus() {
       alert('changing status');
     },
     async saveContent() {
       alert(this.editor.content);
+    },
+    shareContent() {
+      this.$toasted.show('Copied to clipboard');
     },
     async removeNote() {
       alert('removing note');
@@ -141,27 +141,34 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .container {
-    height: 100%;
-    overflow: hidden;
+  height: 100%;
+  overflow: hidden;
 }
 .editor {
-    height: 80vh;
-    overflow: hidden;
-    margin: 20px;
+  height: 80vh;
+  overflow: hidden;
+  margin: 20px;
 }
 .editor__content {
-    margin-top: 15px;
-    height: 70vh;
-    overflow: auto;
-    text-align: left;
-    border: 1px solid black;
+  margin-top: 15px;
+  height: 70vh;
+  max-height: 70vh;
+  overflow: auto;
+  text-align: left;
+  border: 1px solid gray;
 }
+.ProseMirror {
+    min-height: 65vh;
+}
+.ProseMirror:focus {
+    outline: none;
+  }
 .fab {
   position: fixed;
   bottom: 10px;
-  right: 10px;
+  right: 5px;
   background-color: var(--accent-color);
   color: whitesmoke;
 }
@@ -169,7 +176,16 @@ export default {
   bottom: 60px;
 }
 .is-active {
-    color: white;
-    background-color: var(--accent-color);
+  color: white;
+  background-color: var(--accent-color);
+}
+@media only screen and (max-width: 500px) {
+  .editor__content {
+    height: 60vh;
+    max-height: 60vh;
+  }
+  .ProseMirror {
+    min-height: 50vh;
+    }
 }
 </style>
