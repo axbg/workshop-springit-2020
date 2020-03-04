@@ -1,7 +1,6 @@
 package com.springit.workshop.spring.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,8 +13,7 @@ import java.util.Collection;
 @Data
 @Entity
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class User extends AuditableEntity implements Authentication {
+public class User implements Authentication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

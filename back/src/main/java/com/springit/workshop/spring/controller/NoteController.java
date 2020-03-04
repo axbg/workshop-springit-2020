@@ -26,9 +26,14 @@ public class NoteController {
         return ResponseEntity.ok(noteService.find(id));
     }
 
+    @GetMapping("/public/{id}")
+    public ResponseEntity<Note> getPublic(@PathVariable Long id) throws SpringBusinessException {
+        return ResponseEntity.ok(noteService.findPublic(id));
+    }
+
     @PostMapping
     public ResponseEntity<Note> create(@RequestBody Note note) {
-        return ResponseEntity.ok(noteService.create(note));
+        return ResponseEntity.ok(noteService.create(note).getNoteWithShortContent());
     }
 
     @PutMapping
