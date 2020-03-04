@@ -11,7 +11,7 @@ Vue.use(VueMaterial);
 Vue.use(Toasted, { duration: 1500, singleton: true });
 Vue.prototype.$sanitize = sanitizeHTML;
 
-Vue.prototype.$baseUrl = 'http://localhost:8080/api';
+Vue.prototype.$baseUrl = '/api';
 
 Vue.prototype.$fetchHandler = async (url, method, body, credentials) => {
   const options = {
