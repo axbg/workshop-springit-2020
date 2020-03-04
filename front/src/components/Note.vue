@@ -142,7 +142,6 @@ export default {
       }
     },
     async saveContent() {
-      console.log(this.editor.content);
       const result = await this.$fetchHandler(`${this.$baseUrl}/note`, 'PUT', {
         id: this.id,
         content: this.editor.content,
