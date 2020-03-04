@@ -42,6 +42,10 @@ export default {
     background-color: white;
     user-select: none;
 }
+.md-subhead {
+  color: var(--accent-color);
+  font-weight: 800;
+}
 .note-button {
   background-color: var(--accent-color);
   color: white;

@@ -3,13 +3,7 @@
   <div class="container">
     <NoteTile v-for="(note, index) in notes" :key="index" v-bind:id="note.id"
     :content="note.content"/>
-          <infinite-loading
-        v-if="displayInfinite"
-        @infinite="scrollHandler"
-        class="infinite-loader"
-        :distance="20"
-        spinner="waveDots"
-      />
+    <p class="list-end">👌</p>
   </div>
   <md-button class="md-fab md-mini fab" @click="createNote">
         <md-icon>add</md-icon>
@@ -23,7 +17,6 @@ import NoteTile from './NoteTile.vue';
 export default {
   name: 'NoteDashboard',
   data: () => ({
-    displayInfinite: true,
     notes: [
       {
         id: 1,
@@ -70,11 +63,10 @@ export default {
   row-gap: 20px;
   overflow-y: auto;
 }
-.infinite-loader {
+.list-end {
+  display: none;
+  font-size: 30px;
   grid-column: 1 / -1;
-  height: 60px;
-  padding: 0 !important;
-  color: red;
 }
 .fab {
   position: fixed;
@@ -82,5 +74,10 @@ export default {
   right: 10px;
   background-color: var(--accent-color);
   color: whitesmoke;
+}
+@media only screen and (max-width: 650px) {
+  .list-end {
+    display: block;
+  }
 }
 </style>

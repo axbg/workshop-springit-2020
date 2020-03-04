@@ -11,7 +11,8 @@
           <label>Password</label>
           <md-input v-model="password" type="password" ref="password"></md-input>
         </md-field>
-        <md-button class="md-raised md-accent" @click="login">Let's go</md-button>
+        <md-button class="md-raised md-accent button" @click="login">Login</md-button>
+        <md-button class="md-raised md-accent button" @click="register">Register</md-button>
       </md-card-content>
     </md-card>
   </div>
@@ -27,6 +28,9 @@ export default {
     password: '',
   }),
   methods: {
+    async register() {
+      alert('registering');
+    },
     async login() {
       if (
         this.email === ''
@@ -76,6 +80,10 @@ export default {
 .credentials-container {
   margin: 0 auto;
   width: 80%;
+}
+.button {
+  background-color: var(--accent-color);
+  color: white;
 }
 @media only screen and (max-width: 1200px) {
   .login-container {

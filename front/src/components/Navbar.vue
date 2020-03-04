@@ -1,14 +1,19 @@
 <template>
   <nav>
-    <md-button class="md-dense nav-button" @click="displayDashboard">Home</md-button>
-    <span class="user">Accenture@SpringIT</span>
-    <md-button class="md-dense nav-button" @click="logout">Logout</md-button>
+    <md-button class="md-dense nav-button" @click="displayDashboard" v-if="displayControls">
+      Home
+    </md-button>
+    <span class="banner">Accenture@SpringIT</span>
+    <md-button class="md-dense nav-button" @click="logout" v-if="displayControls">Logout</md-button>
   </nav>
 </template>
 
 <script>
 export default {
   name: 'Navbar',
+  props: {
+    displayControls: Boolean,
+  },
   methods: {
     displayDashboard() {
       if (this.$route.path !== '/') {
@@ -16,7 +21,7 @@ export default {
       }
     },
     logout() {
-      // remove isLoggedIn from localStorage
+      localStorage.removeItem('loggedIn');
       window.location.reload();
     },
   },
@@ -33,6 +38,7 @@ nav {
   width: 100%;
   height: 60px;
   background-color: var(--main-color);
+  border-bottom: 1px solid grey;
 }
 .nav-button {
   color: whitesmoke;
@@ -41,11 +47,15 @@ nav {
 .home {
   margin-left: 5px;
 }
+.banner {
+  color: var(--accent-color);
+  font-size: 26px;
+}
 .logout {
   margin-right: 5px;
 }
-@media only screen and (max-width: 385px) {
-  .user {
+@media only screen and (max-width: 470px) {
+  .banner {
     display: none;
   }
 }
