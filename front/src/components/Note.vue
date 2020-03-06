@@ -157,7 +157,7 @@ export default {
     async shareContent() {
       this.isPublic = false;
       await this.changeStatus();
-      window.open(`http://localhost:8081/#/public/${this.id}`);
+      window.open(`/#/public/${this.id}`);
     },
     async removeNote() {
       const result = await this.$fetchHandler(`${this.$baseUrl}/note/${this.id}`, 'DELETE');
