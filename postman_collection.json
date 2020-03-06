@@ -141,6 +141,26 @@
 					"response": []
 				},
 				{
+					"name": "getPublic",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/note/public/3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"note",
+								"public",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "create",
 					"request": {
 						"method": "POST",
@@ -255,7 +275,7 @@
 	],
 	"variable": [
 		{
-			"id": "c3905b9a-71ba-4db8-95f7-15a62b794062",
+			"id": "b8867a5a-90e4-455a-a5ca-93b26977c9e9",
 			"key": "baseUrl",
 			"value": "",
 			"type": "string"
