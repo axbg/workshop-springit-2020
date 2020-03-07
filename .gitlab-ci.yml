@@ -1,0 +1,69 @@
+image: ubuntu:18.04
+
+variables:
+  REGISTRY: registry.gitlab.com/axbg/workshop-spring-2020
+  REGISTRY_PASS: ${PASS}
+  REGISTRY_USERNAME: ${USER}
+
+stages:
+  - init
+  - build
+  - deploy
+
+cache:
+  paths:
+    - front/node_modules
+
+init_project:
+  stage: init
+  artifacts:
+    paths:
+        - back/target/spring-0.0.1-SNAPSHOT.jar
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-server git -y )'
+    - service ssh start
+    - eval $(ssh-agent -s)
+    - apt-get install sudo
+    - apt-get install curl -y
+    - curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+    - apt install nodejs -y
+    - sudo apt-get update
+    - sudo apt-get -y install maven
+    - cd front
+    - npm install
+    - npm run lint
+    - npm run build
+    - cd ../back
+    - mkdir src/main/resources/static
+    - cp -R ../front/dist/* src/main/resources/static
+    - mvn package -DskipTests
+
+build_project:
+  stage: build
+  script:
+    - apt update
+    - apt install sudo
+    - sudo apt -y install docker.io
+    - sudo service docker start
+    - docker build -t axbg/spring .
+    - docker image ls
+    - docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASS} registry.gitlab.com
+    - docker tag axbg/spring:latest $REGISTRY/spring:latest
+    - docker image ls 
+    - docker push $REGISTRY/spring:latest
+
+deploy_project:
+  stage: deploy
+  variables:
+    PROD_USER_PASSWORD: ${VM_PASSWORD}
+    SSH_USER: ${SSH_USER}
+    SSH_IP: ${SSH_IP}
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - touch id_rsa
+    - chmod 400 id_rsa
+    - echo "$SSH_KEY" >> id_rsa
+    - ssh -i id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_IP} "echo ${PROD_USER_PASSWORD} | sudo -S docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASS} registry.gitlab.com; sudo docker pull $REGISTRY/spring:latest; sudo docker stop spring; sudo docker rm spring; sudo docker container run -d --network=host --name spring registry.gitlab.com/axbg/workshop-spring-2020/spring:latest;"
