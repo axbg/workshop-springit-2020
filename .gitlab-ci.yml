@@ -1,9 +1,13 @@
-image: ubuntu:18.04
+image: ubuntu:20.04
 
 variables:
-  REGISTRY: registry.gitlab.com/axbg/workshop-spring-2020
-  REGISTRY_PASS: ${PASS}
-  REGISTRY_USERNAME: ${USER}
+  DOCKER_PASS: ${DOCKER_PASS}
+  DOCKER_USERNAME: ${DOCKER_USERNAME}
+  DOCKER_IMAGE_TAG: ${DOCKER_IMAGE_TAG}
+  DB_HOST: ${DB_HOST}
+  DB_NAME: ${MYSQL_DB}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${MYSQL_PASSWORD}
 
 stages:
   - build
@@ -19,8 +23,9 @@ build_project:
   services:
     - mysql
   variables:
-    MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     MYSQL_DATABASE: ${MYSQL_DB}
+    MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    DOCKER_IMAGE_TAG: ${DOCKER_IMAGE_TAG}
   artifacts:
     paths:
         - back/target/spring-0.0.1-SNAPSHOT.jar
@@ -44,24 +49,22 @@ build_project:
 
 create_image:
   stage: image
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - apt update
-    - apt install sudo
-    - sudo apt -y install docker.io
-    - sudo service docker start
-    - docker build -t axbg/spring .
-    - docker image ls
-    - docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASS} registry.gitlab.com
-    - docker tag axbg/spring:latest $REGISTRY/spring:latest
-    - docker image ls 
-    - docker push $REGISTRY/spring:latest
+    - docker build -t ${DOCKER_IMAGE_TAG} .
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASS}
+    - docker push ${DOCKER_IMAGE_TAG}
 
 deploy_project:
   stage: deploy
   variables:
-    PROD_USER_PASSWORD: ${VM_PASSWORD}
     SSH_USER: ${SSH_USER}
     SSH_IP: ${SSH_IP}
+    SSH_KEY: ${SSH_KEY}
+    CONTAINER_NAME: ${DOCKER_CONTAINER_NAME}
+    CONTAINER_NETWORK: ${DOCKER_CONTAINER_NETWORK}
   script:
     - apt update
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -70,5 +73,5 @@ deploy_project:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - touch id_rsa
     - chmod 400 id_rsa
-    - echo "$SSH_KEY" >> id_rsa
-    - ssh -i id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_IP} "echo ${PROD_USER_PASSWORD} | sudo -S docker login -u ${REGISTRY_USERNAME} -p ${REGISTRY_PASS} registry.gitlab.com; sudo docker pull $REGISTRY/spring:latest; sudo docker stop spring; sudo docker rm spring; sudo docker container run -d --network=app -p 8080:8080 --name spring registry.gitlab.com/axbg/workshop-spring-2020/spring:latest;"
+    - echo "${SSH_KEY}" >> id_rsa
+    - ssh -i id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_IP} "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASS}; docker pull ${DOCKER_IMAGE_TAG}; docker stop ${CONTAINER_NAME}; docker rm ${CONTAINER_NAME}; docker container run -d -e DB_HOST=${DB_HOST} -e DB_NAME=${DB_NAME} -e DB_USERNAME=${DB_USERNAME} -e DB_PASSWORD=${DB_PASSWORD} --network=${CONTAINER_NETWORK} -p 8080:8080 --name ${CONTAINER_NAME} ${DOCKER_IMAGE_TAG};"
