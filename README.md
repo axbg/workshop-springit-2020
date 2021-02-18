@@ -11,4 +11,5 @@
     * Tiptap Text Editor
 * DevOps
     * Docker
+    * GitHub Actions
     * Gitlab CI
